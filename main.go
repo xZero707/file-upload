@@ -37,7 +37,7 @@ func (pr *Progress) Print() {
 		return
 	}
 
-	fmt.Printf("File upload in progress: %d\n", pr.BytesRead)
+	fmt.Printf("Upload in Progress: %d\n", pr.BytesRead)
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +57,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, fileHeader := range files {
 		if fileHeader.Size > MAX_UPLOAD_SIZE {
-			http.Error(w, fmt.Sprintf("The uploaded image is too big: %s. Please use an image less than 1MB in size", fileHeader.Filename), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("The uploaded file is too large: %s.", fileHeader.Filename), http.StatusBadRequest)
 			return
 		}
 
@@ -77,8 +77,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		filetype := http.DetectContentType(buff)
-		if filetype != "image/jpeg" && filetype != "image/png" {
-			http.Error(w, "The provided file format is not allowed. Please upload a JPEG or PNG image", http.StatusBadRequest)
+		if filetype != "application/x-zstd" && filetype != "application/x-tar" {
+			http.Error(w, "The provided file format is not allowed.", http.StatusBadRequest)
 			return
 		}
 
