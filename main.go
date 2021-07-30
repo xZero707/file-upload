@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"log"
 	"net/http"
@@ -66,7 +67,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		destFile, err := os.Create(fmt.Sprintf("%s/%d%s", UPLOAD_PATH, time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
+         
+        destFilename := fmt.Sprintf("%d_%s%s", time.Now().Unix(), uuid.New().String(), filepath.Ext(fileHeader.Filename))
+        destFilePath := fmt.Sprintf("%s/%s", UPLOAD_PATH, destFilename)
+		destFile, err := os.Create(destFilePath)
+
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -82,19 +87,24 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		log.Printf("Upload complete to %s", UPLOAD_PATH)
+		log.Printf("Upload complete: %s", destFilePath)
 	}
 
-	fmt.Fprintf(w, "Upload successful")
+	fmt.Fprintf(w, "Upload complete")
 }
 
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/upload", uploadHandler)
 
+	go func() {
+	    if err := http.ListenAndServe(":4500", mux); err != nil {
+	    	log.Fatal(err)
+	    }
+    }()
+
     log.Println("Server started")
     log.Printf("Upload size limited to %s bytes", os.Getenv("MAX_UPLOAD_SIZE"))
-	if err := http.ListenAndServe(":4500", mux); err != nil {
-		log.Fatal(err)
-	}
+	
+	select {}
 }
