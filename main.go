@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/handlers"
 	"io"
 	"log"
 	"net/http"
@@ -95,7 +94,7 @@ func main() {
 
     log.Println("Server started")
     log.Printf("Upload size limited to %s bytes", os.Getenv("MAX_UPLOAD_SIZE"))
-	if err := http.ListenAndServe(":4500", handlers.LoggingHandler(os.Stdout, mux)); err != nil {
+	if err := http.ListenAndServe(":4500", mux); err != nil {
 		log.Fatal(err)
 	}
 }
