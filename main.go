@@ -10,35 +10,7 @@ import (
 	"time"
 )
 
-const MAX_UPLOAD_SIZE = 1024 * 1024 // 1MB
-
-// Progress is used to track the progress of a file upload.
-// It implements the io.Writer interface so it can be passed
-// to an io.TeeReader()
-type Progress struct {
-	TotalSize int64
-	BytesRead int64
-}
-
-// Write is used to satisfy the io.Writer interface.
-// Instead of writing somewhere, it simply aggregates
-// the total bytes on each read
-func (pr *Progress) Write(p []byte) (n int, err error) {
-	n, err = len(p), nil
-	pr.BytesRead += int64(n)
-	pr.Print()
-	return
-}
-
-// Print displays the current progress of the file upload
-func (pr *Progress) Print() {
-	if pr.BytesRead == pr.TotalSize {
-		fmt.Println("DONE!")
-		return
-	}
-
-	fmt.Printf("Upload in Progress: %d\n", pr.BytesRead)
-}
+const MAX_UPLOAD_SIZE = 5242880 * 1024 // In kilobytes
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -96,11 +68,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 		defer f.Close()
 
-		pr := &Progress{
-			TotalSize: fileHeader.Size,
-		}
-
-		_, err = io.Copy(f, io.TeeReader(file, pr))
+		_, err = io.Copy(f, file)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
