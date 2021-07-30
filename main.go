@@ -33,22 +33,22 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		file, err := fileHeader.Open()
+		srcFile, err := fileHeader.Open()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		defer file.Close()
+		defer srcFile.Close()
 
 		buff := make([]byte, 512)
-		_, err = file.Read(buff)
+		_, err = srcFile.Read(buff)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		_, err = file.Seek(0, io.SeekStart)
+		_, err = srcFile.Seek(0, io.SeekStart)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -60,15 +60,15 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		f, err := os.Create(fmt.Sprintf("./uploads/%d%s", time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
+		destFile, err := os.Create(fmt.Sprintf("./uploads/%d%s", time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		defer f.Close()
+		defer destFile.Close()
 
-		_, err = io.Copy(f, file)
+		_, err = io.Copy(destFile, srcFile)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
