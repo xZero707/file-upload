@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
-const MAX_UPLOAD_SIZE = 5242880 * 1024 // In kilobytes
+const UPLOAD_PATH="/storage"
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -24,11 +25,17 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+    maxUploadSize, err := strconv.ParseInt(os.Getenv("MAX_UPLOAD_SIZE"), 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// get a reference to the fileHeaders
 	files := r.MultipartForm.File["file"]
 
 	for _, fileHeader := range files {
-		if fileHeader.Size > MAX_UPLOAD_SIZE {
+		if fileHeader.Size > maxUploadSize {
 			http.Error(w, fmt.Sprintf("The uploaded file is too large: %s.", fileHeader.Filename), http.StatusBadRequest)
 			return
 		}
@@ -47,13 +54,13 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = os.MkdirAll("./uploads", os.ModePerm)
+		err = os.MkdirAll(UPLOAD_PATH, os.ModePerm)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		destFile, err := os.Create(fmt.Sprintf("./uploads/%d%s", time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
+		destFile, err := os.Create(fmt.Sprintf("%s/%d%s", UPLOAD_PATH, time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
