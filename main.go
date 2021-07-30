@@ -39,7 +39,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, fileHeader := range files {
 		if fileHeader.Size > maxUploadSize {
-			http.Error(w, fmt.Sprintf("The uploaded file is too large: %s.", fileHeader.Filename), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("The file is too large: %s.", fileHeader.Filename), http.StatusBadRequest)
 			return
 		}
 
