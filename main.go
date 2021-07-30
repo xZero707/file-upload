@@ -76,12 +76,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		filetype := http.DetectContentType(buff)
-		if filetype != "application/x-zstd" && filetype != "application/x-tar" {
-			http.Error(w, "The provided file format is not allowed.", http.StatusBadRequest)
-			return
-		}
-
 		_, err = file.Seek(0, io.SeekStart)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
