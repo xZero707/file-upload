@@ -41,13 +41,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 		defer srcFile.Close()
 
-		buff := make([]byte, 512)
-		_, err = srcFile.Read(buff)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		_, err = srcFile.Seek(0, io.SeekStart)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
