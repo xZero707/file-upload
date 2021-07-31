@@ -60,14 +60,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = os.MkdirAll(UPLOAD_PATH, os.ModePerm)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-         
         destFilename := fmt.Sprintf("%d_%s%s", time.Now().Unix(), uuid.New().String(), filepath.Ext(fileHeader.Filename))
         destFilePath := fmt.Sprintf("%s/%s", UPLOAD_PATH, destFilename)
 		destFile, err := os.Create(destFilePath)
@@ -96,6 +88,10 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/upload", uploadHandler)
+
+	go func() {
+		os.MkdirAll(UPLOAD_PATH, os.ModePerm)
+	}()
 
 	go func() {
 	    if err := http.ListenAndServe(":4500", mux); err != nil {
