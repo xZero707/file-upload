@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const UPLOAD_PATH="/storage"
+const UPLOAD_PATH = "/storage"
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -28,7 +28,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    maxUploadSize, err := strconv.ParseInt(os.Getenv("MAX_UPLOAD_SIZE"), 10, 64)
+	maxUploadSize, err := strconv.ParseInt(os.Getenv("MAX_UPLOAD_SIZE"), 10, 64)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -60,8 +60,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-        destFilename := fmt.Sprintf("%d_%s%s", time.Now().Unix(), uuid.New().String(), filepath.Ext(fileHeader.Filename))
-        destFilePath := fmt.Sprintf("%s/%s", UPLOAD_PATH, destFilename)
+		destFilename := fmt.Sprintf("%d_%s%s", time.Now().Unix(), uuid.New().String(), filepath.Ext(fileHeader.Filename))
+		destFilePath := fmt.Sprintf("%s/%s", UPLOAD_PATH, destFilename)
 		destFile, err := os.Create(destFilePath)
 
 		if err != nil {
@@ -94,13 +94,13 @@ func main() {
 	}()
 
 	go func() {
-	    if err := http.ListenAndServe(":4500", mux); err != nil {
-	    	log.Fatal(err)
-	    }
-    }()
+		if err := http.ListenAndServe(":4500", mux); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
-    log.Println("Server started")
-    log.Printf("Upload size limited to %s bytes", os.Getenv("MAX_UPLOAD_SIZE"))
-	
+	log.Println("Server started")
+	log.Printf("Upload size limited to %s bytes", os.Getenv("MAX_UPLOAD_SIZE"))
+
 	select {}
 }
